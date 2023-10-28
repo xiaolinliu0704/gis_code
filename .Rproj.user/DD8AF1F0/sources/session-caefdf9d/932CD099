@@ -3,7 +3,7 @@
     "path": "D:/CASA-USS/GISScience/practical4/practical4/practical4.Rmd",
     "project_path": "practical4.Rmd",
     "type": "r_markdown",
-    "hash": "389133089",
+    "hash": "3939771173",
     "contents": "",
     "dirty": false,
     "created": 1698509304116.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "13,3",
-        "scrollLine": "13"
+        "cursorPosition": "39,0",
+        "scrollLine": "39"
     },
     "folds": "",
-    "lastKnownWriteTime": 1698531015,
+    "lastKnownWriteTime": 1698531732,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1698531015555,
+    "last_content_update": 1698531732348,
     "read_only": false,
     "read_only_alternatives": []
 }

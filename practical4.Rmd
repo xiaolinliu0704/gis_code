@@ -38,7 +38,6 @@ qtm(countries,
     fill = "difference")
 ```
 
-
 ```{r}
 
 tmap_object <- tm_shape(countries) +
