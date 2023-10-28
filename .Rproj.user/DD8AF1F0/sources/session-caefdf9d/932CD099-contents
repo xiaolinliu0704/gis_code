@@ -13,7 +13,6 @@ library(tmap)
 library(tmaptools)
 ```
 
-
 ```{r}
 countries<-sf::st_read(here("data","World_Countries_Generalized","World_Countries_Generalized.shp"))
 mycsv <- read_csv(here::here("data","gii-index.csv") ) 
@@ -25,7 +24,6 @@ mycsv <- mycsv %>%
 diff<-mycsv%>%
   select(country,difference)
 ```
-
 
 ```{r}
 countries<- countries%>%
