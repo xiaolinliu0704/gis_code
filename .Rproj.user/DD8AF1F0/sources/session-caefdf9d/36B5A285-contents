@@ -1,0 +1,182 @@
+
+```{r}
+
+library(sf)
+library(tmap) 
+library(tmaptools)
+library(RSQLite)
+library(tidyverse)
+
+```
+
+```{r}
+install.packages("here")
+library(here)
+here::here()
+
+install.packages("plotly")
+library(plotly)
+install.packages("maptools")
+install.packages(c("classInt", "tmap"))
+
+# might also need these ones
+install.packages(c("RColorBrewer", "sp", "rgeos", 
+                   "tmaptools", "sf", "downloader", "rgdal", 
+                   "geojsonio"))
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(sp)
+library(rgeos)
+library(tmap)
+library(tmaptools)
+library(sf)
+library(rgdal)
+library(geojsonio)
+```
+
+
+```{r}
+
+cs <- read.csv(here::here("data", "Report_Card_Assessment_Data_2018-19_School_Year.csv"),
+              header = TRUE, sep = ",",
+              encoding = "latin1",
+               na = "NULL")
+
+class(cs)
+
+install.packages("janitor")
+library(janitor)
+school_data <- cs %>%
+  clean_names()
+
+```
+
+```{r}
+Datatypelist <- cs %>% 
+  summarise_all(class) %>%
+  pivot_longer(everything(), 
+               names_to="All_variables", 
+               values_to="Variable_class")
+
+Datatypelist
+
+```
+
+
+```{r}
+
+Adams<- cs %>% 
+  filter(str_detect(`County`, "^Adams"))
+
+rate_Adams <- Adams%>% 
+  #new column with average of male and female life expectancy
+  mutate(rate_Adams=CountMetStandard/CountofStudentsExpectedtoTest)
+
+```
+
+```{r}
+
+school_data1<-school_data[c(3,16,18)]
+
+school_data2<- aggregate(.~county,data=school_data1,sum)
+
+rate_county <- school_data2 %>% 
+  #new column with average of male and female life expectancy
+  mutate(rate_county=count_met_standard/countof_students_expectedto_test)
+
+```
+
+```{r}
+filter (county!="Mutiple")
+state_average <-county_only%>%
+  summarise(state_average=mean())
+```
+
+```{r}
+
+new_row  <- rate_county %>%
+  summarize(county= "average",
+            count_met_standard = sum(count_met_standard),
+            countof_students_expectedto_test = sum(countof_students_expectedto_test),
+            rate_county=sum(count_met_standard)/sum(countof_students_expectedto_test)) 
+
+rate_county <- rbind(rate_county, new_row)
+
+rate_county <- rate_county %>%
+  mutate(across(rate_county, round, 4))
+
+rate_county1 <- rate_county %>%
+  mutate(difference=rate_county - new_row$rate_county) %>%
+  mutate(acrosee(difference,round,0)) %>%
+  mutate(washingtoncompare = case_when(difference>0 ~ "above Washington average",
+                                       difference<0 ~ "below Washington average",
+                                       difference=0 ~ "equal Washington average"
+  ))
+
+```
+
+```{r}
+
+rate_county_group1 <- rate_county1 %>%
+  mutate(Washingtondiff = rate_county - new_row$rate_county,
+         across(Washingtondiff, round, 4))
+```
+
+```{r}
+shape <- st_read(here::here("data",
+                        "Washington_Counties_with_Natural_Shoreline___washsh_area",
+                        "Washington_Counties_with_Natural_Shoreline___washsh_area.shp"))
+
+WashingtonMap<- shape %>%
+  clean_names()%>%
+  left_join(., 
+            rate_county_group1,
+            by = c("countylabe" = "county"))
+
+```
+
+```{r}
+library(tmap)
+library(tmaptools)
+tmap_mode("plot")
+qtm(WashingtonMap, 
+    fill = "Washingtondiff")
+str(WashingtonMap)
+
+install.packages("OpenStreetMap")
+
+library(OpenStreetMap)
+
+tmapwashington <- WashingtonMap %>%
+  st_bbox(.) %>% 
+  tmaptools::read_osm(., type = "osm", zoom = NULL)
+
+```
+
+```{r}
+
+tmap_object <- tm_shape(tmapwashington)+
+  tm_rgb()+
+  tm_shape(WashingtonMap) +tm_borders()+tm_text(text = "county",size=0.5)+
+  tm_fill(col = "washingtoncompare",palette="Blues",alpha = 0.5)+
+  tm_compass(position = c("left", "bottom"),type = "arrow",text.size = 0.5) + 
+  tm_scale_bar(position = c("left", "bottom"),text.size = 0.5) +
+  tm_layout(title = "Difference in rate of student met standard", legend.position = c("right", "bottom"),legend.text.size = 0.5)
+ 
+
+tmap_object
+
+tm_shape(tmapwashington)+
+tm_rgb()+ 
+tm_shape(WashingtonMap)+
+tm_polygons("Washingtondiff", 
+        style="pretty",
+        palette="Blues",
+        midpoint=0,
+        title="Diffence",
+        alpha = 0.5) + 
+  tm_compass(position = c("left", "bottom"),type = "arrow",text.size = 0.5) + 
+  tm_scale_bar(position = c("left", "bottom"),text.size = 0.5) +
+  tm_layout(title = "Difference in rate of student met standard", legend.position = c("right", "bottom"),legend.text.size = 0.5)
+```

@@ -1,0 +1,4 @@
+"0","mycsv <- mycsv %>%"
+"0","  mutate(difference = gii_2019 - gii_2010)"
+"0","diff<-mycsv%>%"
+"0","  select(country,difference)"
