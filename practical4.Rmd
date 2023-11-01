@@ -14,15 +14,15 @@ library(tmaptools)
 ```
 
 ```{r}
-countries<-sf::st_read(here("data","World_Countries_Generalized","World_Countries_Generalized.shp"))
-mycsv <- read_csv(here::here("data","gii-index.csv") ) 
+countries<-sf::st_read(here("..","data","World_Countries_Generalized","World_Countries_Generalized.shp"))
+mycsv <- read_csv(here::here("..","data","gii-index.csv") ,locale=locale(encoding='latin1'),na=" ",skip=0) 
 ```
 
 ```{r}
 mycsv <- mycsv %>%
   mutate(difference = gii_2019 - gii_2010)
 diff<-mycsv%>%
-  select(country,difference)
+  select(ios3,country,difference)
 ```
 
 ```{r}
